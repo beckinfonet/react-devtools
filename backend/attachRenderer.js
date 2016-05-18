@@ -69,32 +69,40 @@ function attachRenderer(hook: Hook, rid: string, renderer: ReactRenderer): Helpe
 
   var {ReactDebugTool, ComponentTreeDevtool} = renderer;
   ComponentTreeDevtool.getRootIDs().forEach(rootID => {
-    var fakeComp = {};
-    rootNodeIDMap.set(rootID, fakeComp);
-    visitID(renderer, rootID, fakeComp);
+    var fakeComp = visitID(renderer, rootID);
     hook.emit('root', {
       renderer: rid,
       element: fakeComp,
     });
   });
 
-  function visitID(renderer, id, fakeComp) {
+  function visitID(renderer, id) {
+    var fakeComp = { _rootNodeID: id };
+    rootNodeIDMap.set(id, fakeComp);
+    
+    var fakeChildComps = ComponentTreeDevtool.getChildIDs(id).map(childID => {
+      return visitID(renderer, childID);
+    });
+
+    var element = ComponentTreeDevtool.getElement(id);
     hook.emit('mount', {
       renderer: rid,
       element: fakeComp,
       data: {
         id,
         nodeType: 'Composite',
-        name: 'Lol',
-        type: () => {},
-        props: {},
+        name: ComponentTreeDevtool.getDisplayName(id),
+        type: element && element.type,
+        props: element && element.props,
         state: {},
         context: {},
-        children: [],
+        children: fakeChildComps,
         updater: {},
         publicInstance: {},
       }
     });
+
+    return fakeComp;
   }
 
 
