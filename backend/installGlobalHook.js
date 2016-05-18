@@ -53,6 +53,7 @@ function installGlobalHook(window: Object) {
         }
       },
       emit: function(evt, data) {
+        console.log(evt, data)
         if (this._listeners[evt]) {
           this._listeners[evt].map(fn => fn(data));
         }
