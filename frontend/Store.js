@@ -465,6 +465,7 @@ class Store extends EventEmitter {
   }
 
   _mountComponent(data: DataType) {
+    console.log('mount component', data.id)
     var map = Map(data).set('renders', 1);
     if (data.nodeType === 'Composite') {
       map = map.set('collapsed', true);

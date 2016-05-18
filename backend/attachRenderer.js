@@ -27,6 +27,7 @@ function attachRenderer(hook: Hook, rid: string, renderer: ReactRenderer): Helpe
   var isPre013 = !renderer.Reconciler;
 
   // React Native
+  /*
   if (renderer.Mount.findNodeHandle && renderer.Mount.nativeTagToRootNodeID) {
     extras.getNativeFromReactElement = function(component) {
       return renderer.Mount.findNodeHandle(component);
@@ -37,7 +38,8 @@ function attachRenderer(hook: Hook, rid: string, renderer: ReactRenderer): Helpe
       return rootNodeIDMap.get(id);
     };
   // React DOM 15+
-  } else if (renderer.ComponentTree) {
+  } else*/
+  if (renderer.ComponentTree) {
     extras.getNativeFromReactElement = function(component) {
       return renderer.ComponentTree.getNodeFromInstance(component);
     };
@@ -46,7 +48,7 @@ function attachRenderer(hook: Hook, rid: string, renderer: ReactRenderer): Helpe
       return renderer.ComponentTree.getClosestInstanceFromNode(node);
     };
   // React DOM
-  } else if (renderer.Mount.getID && renderer.Mount.getNode) {
+  }/* else if (renderer.Mount.getID && renderer.Mount.getNode) {
     extras.getNativeFromReactElement = function(component) {
       try {
         return renderer.Mount.getNode(component._rootNodeID);
@@ -63,8 +65,40 @@ function attachRenderer(hook: Hook, rid: string, renderer: ReactRenderer): Helpe
     };
   } else {
     console.warn('Unknown react version (does not have getID), probably an unshimmed React Native');
+  }*/
+
+  var {ReactDebugTool, ComponentTreeDevtool} = renderer;
+  ComponentTreeDevtool.getRootIDs().forEach(rootID => {
+    var fakeComp = {};
+    rootNodeIDMap.set(rootID, fakeComp);
+    visitID(renderer, rootID, fakeComp);
+    hook.emit('root', {
+      renderer: rid,
+      element: fakeComp,
+    });
+  });
+
+  function visitID(renderer, id, fakeComp) {
+    hook.emit('mount', {
+      renderer: rid,
+      element: fakeComp,
+      data: {
+        id,
+        nodeType: 'Composite',
+        name: 'Lol',
+        type: () => {},
+        props: {},
+        state: {},
+        context: {},
+        children: [],
+        updater: {},
+        publicInstance: {},
+      }
+    });
   }
 
+
+  /*
   var oldMethods;
   var oldRenderComponent;
   var oldRenderRoot;
@@ -153,10 +187,12 @@ function attachRenderer(hook: Hook, rid: string, renderer: ReactRenderer): Helpe
     oldRenderRoot = null;
     oldRenderComponent = null;
   };
+  */
 
   return extras;
 }
 
+/*
 function walkRoots(roots, onMount, onRoot, isPre013) {
   for (var name in roots) {
     walkNode(roots[name], onMount, isPre013);
@@ -205,5 +241,6 @@ function restoreMany(source, olds) {
     source[name] = olds[name];
   }
 }
+*/
 
 module.exports = attachRenderer;
