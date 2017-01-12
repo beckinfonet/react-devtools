@@ -181,7 +181,8 @@ class Panel extends React.Component {
       this._store = new Store(this._bridge);
       var refresh = () => this.forceUpdate();
       this.plugins = [
-        new RelayPlugin(this._store, this._bridge, refresh),
+// I don't care about this for now:
+//        new RelayPlugin(this._store, this._bridge, refresh),
       ];
       this._keyListener = keyboardNav(this._store, window);
 

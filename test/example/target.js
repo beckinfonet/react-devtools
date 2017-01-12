@@ -14,10 +14,6 @@
 var React = require('react');
 var ReactDOM = require('react-dom');
 
-function Simple() {
-  return <h1>Hi</h1>;
-}
-
 var node = document.createElement('div');
 document.body.appendChild(node);
-ReactDOM.render(<Simple />, node);
+ReactDOM.render(<h1>Hi</h1>, node);

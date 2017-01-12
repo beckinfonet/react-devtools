@@ -36,7 +36,8 @@ agent.addBridge(bridge);
 
 inject(window.__REACT_DEVTOOLS_GLOBAL_HOOK__, agent);
 
-setupHighlighter(agent);
-setupRelay(bridge, agent, window.__REACT_DEVTOOLS_GLOBAL_HOOK__);
+// I don't care about these for now
+//setupHighlighter(agent);
+//setupRelay(bridge, agent, window.__REACT_DEVTOOLS_GLOBAL_HOOK__);
 
-BananaSlugBackendManager.init(agent);
+//BananaSlugBackendManager.init(agent);

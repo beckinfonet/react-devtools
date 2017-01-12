@@ -91,7 +91,7 @@ class SearchPane extends React.Component {
     }
     return (
       <div style={styles.container}>
-        <SettingsPane />
+        {/*Disabling. It is annoying. <SettingsPane />*/}
         <TreeView reload={this.props.reload} />
         <div style={styles.searchBox}>
           <input
