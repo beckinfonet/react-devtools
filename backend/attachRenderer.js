@@ -38,8 +38,18 @@ function attachRenderer(hook: Hook, rid: string, renderer: ReactRenderer): Helpe
     extras.cleanup = function() {};
     extras.walkTree = function() {
       const root = renderer.getRoot();
-      const current = root.stateNode.current;
-      
+      let current = root.stateNode.current;
+
+      Object.defineProperty(root.stateNode, 'current', {
+        get() {
+          return current;
+        },
+        set(nextCurrent) {
+          current = nextCurrent;
+          updateFiber(current);
+        }
+      })
+
       let node = current;
       outer: while (true) {
         if (node.child) {
@@ -134,6 +144,50 @@ function attachRenderer(hook: Hook, rid: string, renderer: ReactRenderer): Helpe
           throw new Error('todo');
       }
       return data;
+    }
+
+    function mapChildren(parent, allKeys) {
+      let children = new Map();
+      let node = parent.child;
+      while (node) {
+        const key = node.key || node.index;
+        allKeys.add(key);
+        children.set(key, node);
+        node = node.sibling;
+      }
+      return children;      
+    }
+
+    function unmountFiber(fiber) {
+      console.log('unmount')
+    }
+
+    function mountFiber(fiber) {
+      console.log('mount')
+    }
+
+    function updateFiber(fiber) {
+      console.log('update')
+
+      const previous = fiber.alternate;
+      let allKeys = new Set();
+      let prevChildren = mapChildren(previous, allKeys);
+      let nextChildren = mapChildren(fiber, allKeys);
+      allKeys.forEach(key => {
+        const prevChild = prevChildren.get(key);
+        const nextChild = nextChildren.get(key);
+
+        if (prevChild && !nextChild) {
+          unmountFiber(prevChild);
+        } else if (!prevChild && nextChild) {
+          mountFiber(nextChild);
+        } else if (prevChild === nextChild) {
+          console.log('bail')
+          // bail out
+        } else {
+          updateFiber(nextChild);
+        }
+      })
     }
 
     return extras;
