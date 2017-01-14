@@ -98,7 +98,6 @@ function attachRenderer(hook: Hook, rid: string, renderer: ReactRenderer): Helpe
         data.children.push(child);
         child = child.sibling;
       }
-        console.log(fiber.tag)
       switch (fiber.tag) {
         case 3:
           data.nodeType = 'Wrapper';
@@ -129,7 +128,7 @@ function attachRenderer(hook: Hook, rid: string, renderer: ReactRenderer): Helpe
           break;
         case 6:
           data.nodeType = 'Text';
-          data.text = fiber.memoizedProps.children;
+          data.text = fiber.memoizedProps;
           break;
         default:
           throw new Error('todo');

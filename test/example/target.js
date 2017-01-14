@@ -17,7 +17,28 @@ var ReactDOM = require('react-dom/fiber');
 var node = document.createElement('div');
 document.body.appendChild(node);
 
+class Counter extends React.Component {
+  state = { value: 0 };
+  componentDidMount() {
+    setInterval(() => this.tick(), 1000);
+  }
+  tick() {
+    this.setState(({ value }) => ({ value: value + 1 }))
+  }
+  render() {
+    return <tr><td>{this.state.value}</td></tr>;
+  }
+}
+
+function CoolRows() {
+  return [
+    <tr><td>Hello</td></tr>,
+    <Counter />,
+    <tr><td>World</td></tr>
+  ]
+}
+
 ReactDOM.render(
-  ['lol', 'hi'],
+  <table><tbody><CoolRows /></tbody></table>,
   node
 );
