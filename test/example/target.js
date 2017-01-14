@@ -26,7 +26,12 @@ class Counter extends React.Component {
     this.setState(({ value }) => ({ value: value + 1 }))
   }
   render() {
-    return this.state.value % 2 === 0 ? null : <tr><td>{this.state.value}</td></tr>;
+    return (
+      <tr>
+        <td>{this.state.value}</td>
+        {this.state.value % 2 === 0 && <td>is even!</td>}
+      </tr>
+    );
   }
 }
 

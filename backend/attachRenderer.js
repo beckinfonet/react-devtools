@@ -46,52 +46,23 @@ function attachRenderer(hook: Hook, rid: string, renderer: ReactRenderer): Helpe
         },
         set(nextCurrent) {
           current = nextCurrent;
-          updateFiber(current);
+          try {
+            updateFiber(current);
+          } catch (err) {
+            console.error(err)
+          }
         }
       })
 
-      let node = current;
-      outer: while (true) {
-        if (node.child) {
-          node.child.return = node;
-          node = node.child;
-          continue;
-        }
-
-        // leaf
-        hook.emit('mount', {
-          element: node,
-          data: describe(node),
-          renderer: rid
-        });
-
-        if (node === root) {
-          break outer;
-        }
-        while (!node.sibling) {
-          if (!node.return) {
-            break outer;
-          }
-          node = node.return;
-
-          // parent
-          hook.emit('mount', {
-            element: node,
-            data: describe(node),
-            renderer: rid
-          });
-
-        }
-        node.sibling.return = node.return;
-        node = node.sibling;
-      }
-
+      mountFiber(current);
       // root
       hook.emit('root', {
-        element: current,
+        // TODO: there's no single instance!
+        element: current._debugID,
         renderer: rid
       });
     }
+
     function describe(fiber) {
       let data = {
         type: fiber.type,
@@ -105,7 +76,7 @@ function attachRenderer(hook: Hook, rid: string, renderer: ReactRenderer): Helpe
       };
       let child = fiber.child;
       while (child) {
-        data.children.push(child);
+        data.children.push(child._debugID);
         child = child.sibling;
       }
       switch (fiber.tag) {
@@ -159,11 +130,104 @@ function attachRenderer(hook: Hook, rid: string, renderer: ReactRenderer): Helpe
     }
 
     function unmountFiber(fiber) {
-      console.log('unmount')
+      // TODO: is it faster to unmount just the root?
+      let node = fiber;
+      outer: while (true) {
+        if (node.child) {
+          // node.child.return = node;
+          node = node.child;
+          continue;
+        }
+
+        // leaf
+        console.log('unmount', describe(node).name)
+        hook.emit('unmount', {
+          element: node._debugID,
+          renderer: rid
+        });
+
+        if (node.sibling) {
+          // node.sibling.return = node.return;
+          node = node.sibling;
+          continue;
+        }
+
+        if (node == fiber) {
+          return;
+        }
+
+        while (node.return) {
+          node = node.return;
+          // parent
+          console.log('unmount', describe(node).name)
+          hook.emit('unmount', {
+            element: node._debugID,
+            renderer: rid
+          });
+
+          if (node == fiber) {
+            return;
+          }
+
+          if (node.sibling) {
+            // node.sibling.return = node.return;
+            node = node.sibling;
+            continue outer;
+          }        
+        }
+        return;
+      }
     }
 
     function mountFiber(fiber) {
-      console.log('mount')
+      let node = fiber;
+      outer: while (true) {
+        if (node.child) {
+          // node.child.return = node;
+          node = node.child;
+          continue;
+        }
+
+        // leaf
+        console.log('mount', describe(node).name)
+        hook.emit('mount', {
+          element: node._debugID,
+          data: describe(node),
+          renderer: rid
+        });
+
+        if (node.sibling) {
+          // node.sibling.return = node.return;
+          node = node.sibling;
+          continue;
+        }
+
+        if (node == fiber) {
+          return;
+        }
+
+        while (node.return) {
+          node = node.return;
+          // parent
+          console.log('mount', describe(node).name)
+          hook.emit('mount', {
+            element: node._debugID,
+            data: describe(node),
+            renderer: rid
+          });
+
+          if (node == fiber) {
+            return;
+          }
+
+          if (node.sibling) {
+            // node.sibling.return = node.return;
+            node = node.sibling;
+            continue outer;
+          }        
+        }
+        return;
+      }
     }
 
     function updateFiber(fiber) {
@@ -187,8 +251,14 @@ function attachRenderer(hook: Hook, rid: string, renderer: ReactRenderer): Helpe
         } else {
           updateFiber(nextChild);
         }
-      })
-    }
+      });
+
+      hook.emit('update', {
+        element: fiber._debugID,
+        data: describe(fiber),
+        renderer: rid
+      });
+   }
 
     return extras;
   }
