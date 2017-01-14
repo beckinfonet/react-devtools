@@ -26,6 +26,22 @@ function attachRenderer(hook: Hook, rid: string, renderer: ReactRenderer): Helpe
   // Before 0.13 there was no Reconciler, so we patch Component.Mixin
   var isPre013 = !renderer.Reconciler;
 
+
+  // React Fiber
+  if (renderer.getRoot) {
+    extras.getNativeFromReactElement = function() {
+      return null;
+    };
+    extras.getReactElementFromNative = function() {
+      return null;
+    };
+    extras.cleanup = function() {};
+    extras.walkTree = function(visit, visitRoot) {
+    }
+    return extras;
+  }
+
+
   // React Native
   if (renderer.Mount.findNodeHandle && renderer.Mount.nativeTagToRootNodeID) {
     extras.getNativeFromReactElement = function(component) {
