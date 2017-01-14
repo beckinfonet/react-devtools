@@ -36,8 +36,106 @@ function attachRenderer(hook: Hook, rid: string, renderer: ReactRenderer): Helpe
       return null;
     };
     extras.cleanup = function() {};
-    extras.walkTree = function(visit, visitRoot) {
+    extras.walkTree = function() {
+      const root = renderer.getRoot();
+      const current = root.stateNode.current;
+      
+      let node = current;
+      outer: while (true) {
+        if (node.child) {
+          node.child.return = node;
+          node = node.child;
+          continue;
+        }
+
+        // leaf
+        hook.emit('mount', {
+          element: node,
+          data: describe(node),
+          renderer: rid
+        });
+
+        if (node === root) {
+          break outer;
+        }
+        while (!node.sibling) {
+          if (!node.return) {
+            break outer;
+          }
+          node = node.return;
+
+          // parent
+          hook.emit('mount', {
+            element: node,
+            data: describe(node),
+            renderer: rid
+          });
+
+        }
+        node.sibling.return = node.return;
+        node = node.sibling;
+      }
+
+      // root
+      hook.emit('root', {
+        element: current,
+        renderer: rid
+      });
     }
+    function describe(fiber) {
+      let data = {
+        type: fiber.type,
+        key: fiber.key,
+        ref: fiber.ref,
+        source: fiber._debugSource,
+        props: fiber.memoizedProps,
+        state: fiber.memoizedState,
+        publicInstance: fiber.stateNode,
+        children: [],
+      };
+      let child = fiber.child;
+      while (child) {
+        data.children.push(child);
+        child = child.sibling;
+      }
+      switch (fiber.tag) {
+        case 3:
+          data.nodeType = 'Wrapper';
+          break;
+        case 1:
+        case 2:
+          data.nodeType = 'Composite';
+          data.name = fiber.type.displayName || fiber.type.name;
+          data.publicInstance = fiber.stateNode;
+          data.updater = {
+            setState() {},
+            forceUpdate() {},
+            setInProps() {},
+            setInState() {},
+            setInContext() {},
+          };
+          break;
+        case 5:
+          data.nodeType = 'Native';
+          data.name = fiber.type;
+          data.publicInstance = fiber.stateNode;
+          if (
+            typeof fiber.memoizedProps.children === 'string' ||
+            typeof fiber.memoizedProps.children === 'number'
+          ) {
+            data.children = fiber.memoizedProps.children.toString();
+          }
+          break;
+        case 6:
+          data.nodeType = 'Text';
+          data.text = fiber.memoizedProps.children;
+          break;
+        default:
+          throw new Error('todo');
+      }
+      return data;
+    }
+
     return extras;
   }
 
