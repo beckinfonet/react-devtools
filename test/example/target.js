@@ -12,7 +12,7 @@
 'use strict';
 
 var React = require('react');
-var ReactDOM = require('react-dom');
+var ReactDOM = require('react-dom/fiber');
 
 var node = document.createElement('div');
 document.body.appendChild(node);
