@@ -11,8 +11,6 @@
  */
 'use strict';
 
-var path = require('path');
-
 module.exports = {
   devtool: 'cheap-module-eval-source-map',
   entry: {
@@ -28,10 +26,7 @@ module.exports = {
     loaders: [{
       test: /\.js$/,
       loader:  'babel',
-      include: [
-        __dirname,
-        path.normalize(path.join(__dirname, '..', '..', 'utils'))
-      ],
+      exclude: /node_modules|build/
     }],
   },
 };

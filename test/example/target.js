@@ -16,4 +16,8 @@ var ReactDOM = require('react-dom/fiber');
 
 var node = document.createElement('div');
 document.body.appendChild(node);
-ReactDOM.render(<h1>Hi</h1>, node);
+
+ReactDOM.render(
+  ['lol', 'hi'],
+  node
+);

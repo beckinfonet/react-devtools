@@ -98,6 +98,7 @@ function attachRenderer(hook: Hook, rid: string, renderer: ReactRenderer): Helpe
         data.children.push(child);
         child = child.sibling;
       }
+        console.log(fiber.tag)
       switch (fiber.tag) {
         case 3:
           data.nodeType = 'Wrapper';
