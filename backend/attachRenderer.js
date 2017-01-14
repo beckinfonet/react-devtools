@@ -159,7 +159,7 @@ function attachRenderer(hook: Hook, rid: string, renderer: ReactRenderer): Helpe
         while (node.return) {
           node = node.return;
           // parent
-          console.log('unmount', describe(node).name)
+          // console.log('unmount', describe(node).name)
           hook.emit('unmount', {
             element: node._debugID,
             renderer: rid
@@ -189,7 +189,7 @@ function attachRenderer(hook: Hook, rid: string, renderer: ReactRenderer): Helpe
         }
 
         // leaf
-        console.log('mount', describe(node).name)
+        // console.log('mount', describe(node).name)
         hook.emit('mount', {
           element: node._debugID,
           data: describe(node),
@@ -209,7 +209,7 @@ function attachRenderer(hook: Hook, rid: string, renderer: ReactRenderer): Helpe
         while (node.return) {
           node = node.return;
           // parent
-          console.log('mount', describe(node).name)
+          // console.log('mount', describe(node).name)
           hook.emit('mount', {
             element: node._debugID,
             data: describe(node),
@@ -231,7 +231,7 @@ function attachRenderer(hook: Hook, rid: string, renderer: ReactRenderer): Helpe
     }
 
     function updateFiber(fiber) {
-      console.log('update')
+      // console.log('update')
 
       const previous = fiber.alternate;
       let allKeys = new Set();
@@ -246,7 +246,7 @@ function attachRenderer(hook: Hook, rid: string, renderer: ReactRenderer): Helpe
         } else if (!prevChild && nextChild) {
           mountFiber(nextChild);
         } else if (prevChild === nextChild) {
-          console.log('bail')
+          // console.log('bail')
           // bail out
         } else {
           updateFiber(nextChild);
