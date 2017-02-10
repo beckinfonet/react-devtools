@@ -38,6 +38,10 @@ module.exports = (bridge: Bridge, agent: Agent, hook: Object) => {
     DefaultStoreData,
     setRequestListener,
   } = hook._relayInternals;
+  if (typeof setRequestListener !== 'function') {
+    // Relay 2 support is not implemented
+    return;
+  }
 
   function sendStoreData() {
     if (subscriptionEnabled) {
